@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tic-Tac-Toe Test Client</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 500px;
+        width: 90%;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 32px;
+      }
+
+      .subtitle {
+        text-align: center;
+        margin-bottom: 30px;
+        opacity: 0.9;
+        font-size: 16px;
+      }
+
+      .login-screen,
+      .menu-screen,
+      .game-screen,
+      .leaderboard-screen {
+        display: none;
+      }
+
+      .login-screen.active,
+      .menu-screen.active,
+      .game-screen.active,
+      .leaderboard-screen.active {
+        display: block;
+      }
+
+      input {
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        margin-bottom: 15px;
+      }
+
+      button {
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-bottom: 10px;
+        transition: transform 0.2s, opacity 0.2s;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      .primary-btn {
+        background: white;
+        color: #6366f1;
+      }
+
+      .secondary-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .board {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin: 20px 0;
+        max-width: 320px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .cell {
+        aspect-ratio: 1;
+        background: rgba(255, 255, 255, 0.3);
+        border: none;
+        border-radius: 10px;
+        font-size: 48px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .cell:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.4);
+        transform: scale(1.05);
+      }
+
+      .cell:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+
+      .cell.x {
+        color: #10b981;
+      }
+
+      .cell.o {
+        color: #f59e0b;
+      }
+
+      .status {
+        text-align: center;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      .status.your-turn {
+        background: #10b981;
+      }
+
+      .status.opponent-turn {
+        background: #6b7280;
+      }
+
+      .status.won {
+        background: #10b981;
+      }
+
+      .status.lost {
+        background: #ef4444;
+      }
+
+      .status.draw {
+        background: #f59e0b;
+      }
+
+      .player-info {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 16px;
+      }
+
+      .logs {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px;
+        border-radius: 10px;
+        max-height: 150px;
+        overflow-y: auto;
+        font-size: 12px;
+        font-family: monospace;
+        margin-top: 20px;
+      }
+
+      .log-entry {
+        margin-bottom: 5px;
+        opacity: 0.9;
+      }
+
+      .leaderboard-list {
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .leaderboard-item {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .rank {
+        font-size: 24px;
+        font-weight: bold;
+        min-width: 50px;
+      }
+
+      .player-stats {
+        flex: 1;
+        margin: 0 15px;
+      }
+
+      .player-name {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .stats {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      .score {
+        font-size: 20px;
+        font-weight: bold;
+        background: rgba(255, 255, 255, 0.3);
+        padding: 5px 15px;
+        border-radius: 8px;
+      }
+
+      .searching {
+        text-align: center;
+        padding: 30px;
+      }
+
+      .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid white;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Login Screen -->
+      <div class="login-screen active">
+        <h1>🎮 Tic-Tac-Toe</h1>
+        <p class="subtitle">Multiplayer Battle</p>
+        <input
+          type="text"
+          id="username"
+          placeholder="Enter your username"
+          maxlength="20"
+        />
+        <button class="primary-btn" onclick="login()">Start Playing</button>
+      </div>
+
+      <!-- Menu Screen -->
+      <div class="menu-screen">
+        <h1 id="welcome-text">Welcome! 👋</h1>
+        <div id="searching-box" style="display: none">
+          <div class="searching">
+            <div class="spinner"></div>
+            <p>Finding opponent...</p>
+          </div>
+        </div>
+        <div id="menu-buttons">
+          <button class="secondary-btn" onclick="findMatch()">
+            ⚔️ Find Match
+          </button>
+          <button class="secondary-btn" onclick="showLeaderboard()">
+            🏆 Leaderboard
+          </button>
+        </div>
+      </div>
+
+      <!-- Game Screen -->
+      <div class="game-screen">
+        <div class="player-info" id="player-info">You (X) VS Opponent</div>
+        <div class="status your-turn" id="game-status">🎯 Your Turn</div>
+        <div class="board" id="board"></div>
+        <div id="game-over-buttons" style="display: none">
+          <button class="primary-btn" onclick="rematch()">
+            Find New Match
+          </button>
+          <button class="secondary-btn" onclick="backToMenu()">
+            Back to Menu
+          </button>
+        </div>
+      </div>
+
+      <!-- Leaderboard Screen -->
+      <div class="leaderboard-screen">
+        <h1>🏆 Leaderboard</h1>
+        <div class="leaderboard-list" id="leaderboard-list"></div>
+        <button
+          class="primary-btn"
+          onclick="backToMenu()"
+          style="margin-top: 20px"
+        >
+          Back to Menu
+        </button>
+      </div>
+
+      <!-- Debug Logs -->
+      <div class="logs" id="logs"></div>
+    </div>
+
+    <script>
+      const SERVER_URL = "ws://localhost:3000";
+      let ws = null;
+      let playerId = null;
+      let username = "";
+      let gameState = {
+        gameId: null,
+        board: Array(9).fill(null),
+        symbol: "X",
+        yourTurn: false,
+        opponent: "",
+        status: "waiting",
+        winner: null,
+      };
+
+      function log(message) {
+        const logs = document.getElementById("logs");
+        const entry = document.createElement("div");
+        entry.className = "log-entry";
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        logs.appendChild(entry);
+        logs.scrollTop = logs.scrollHeight;
+      }
+
+      function showScreen(screen) {
+        document
+          .querySelectorAll(
+            ".login-screen, .menu-screen, .game-screen, .leaderboard-screen"
+          )
+          .forEach((s) => {
+            s.classList.remove("active");
+          });
+        document.querySelector(`.${screen}-screen`).classList.add("active");
+      }
+
+      function connectWebSocket() {
+        ws = new WebSocket(SERVER_URL);
+
+        ws.onopen = () => {
+          log("✅ Connected to server");
+        };
+
+        ws.onmessage = (event) => {
+          const { type, payload } = JSON.parse(event.data);
+          log(`📨 Received: ${type}`);
+          handleServerMessage(type, payload);
+        };
+
+        ws.onerror = (error) => {
+          log("❌ WebSocket error");
+          alert(
+            "Failed to connect to server. Make sure the server is running on localhost:3000"
+          );
+        };
+
+        ws.onclose = () => {
+          log("🔌 Disconnected from server");
+        };
+      }
+
+      function sendMessage(type, payload) {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type, payload }));
+          log(`📤 Sent: ${type}`);
+        }
+      }
+
+      function handleServerMessage(type, payload) {
+        switch (type) {
+          case "JOINED":
+            playerId = payload.playerId;
+            username = payload.username;
+            document.getElementById(
+              "welcome-text"
+            ).textContent = `Welcome, ${username}! 👋`;
+            showScreen("menu");
+            break;
+
+          case "MATCHMAKING":
+            document.getElementById("searching-box").style.display = "block";
+            document.getElementById("menu-buttons").style.display = "none";
+            break;
+
+          case "MATCH_FOUND":
+            gameState = {
+              gameId: payload.gameId,
+              board: Array(9).fill(null),
+              symbol: payload.symbol,
+              yourTurn: payload.yourTurn,
+              opponent: payload.opponent,
+              status: "playing",
+              winner: null,
+            };
+            showScreen("game");
+            updateGameUI();
+            renderBoard();
+            break;
+
+          case "GAME_UPDATE":
+            gameState.board = payload.board;
+            gameState.status = payload.status;
+            gameState.yourTurn = payload.currentTurn === playerId;
+            gameState.winner = payload.winner || payload.winnerId;
+            updateGameUI();
+            renderBoard();
+            break;
+
+          case "OPPONENT_DISCONNECTED":
+            alert("Victory! " + payload.message);
+            gameState.status = "finished";
+            gameState.winner = gameState.symbol;
+            updateGameUI();
+            break;
+
+          case "LEADERBOARD":
+            displayLeaderboard(payload.leaderboard);
+            break;
+
+          case "ERROR":
+            log("⚠️ Error: " + payload.message);
+            break;
+        }
+      }
+
+      function login() {
+        const input = document.getElementById("username");
+        const name = input.value.trim();
+        if (!name) {
+          alert("Please enter a username");
+          return;
+        }
+        username = name;
+        connectWebSocket();
+        setTimeout(() => {
+          sendMessage("JOIN", { username });
+        }, 500);
+      }
+
+      function findMatch() {
+        sendMessage("FIND_MATCH", {});
+      }
+
+      function makeMove(position) {
+        if (!gameState.yourTurn || gameState.status !== "playing") return;
+        if (gameState.board[position] !== null) return;
+
+        sendMessage("MAKE_MOVE", {
+          gameId: gameState.gameId,
+          position,
+        });
+      }
+
+      function rematch() {
+        sendMessage("REMATCH", {});
+        document.getElementById("searching-box").style.display = "block";
+        document.getElementById("game-over-buttons").style.display = "none";
+      }
+
+      function backToMenu() {
+        document.getElementById("searching-box").style.display = "none";
+        document.getElementById("menu-buttons").style.display = "block";
+        document.getElementById("game-over-buttons").style.display = "none";
+        showScreen("menu");
+      }
+
+      function showLeaderboard() {
+        sendMessage("GET_LEADERBOARD", {});
+        showScreen("leaderboard");
+      }
+
+      function updateGameUI() {
+        const playerInfo = document.getElementById("player-info");
+        playerInfo.textContent = `You (${gameState.symbol}) VS ${gameState.opponent}`;
+
+        const status = document.getElementById("game-status");
+        if (gameState.status === "finished") {
+          document.getElementById("game-over-buttons").style.display = "block";
+          if (gameState.winner === "draw") {
+            status.textContent = "🤝 Draw!";
+            status.className = "status draw";
+          } else if (gameState.winner === gameState.symbol) {
+            status.textContent = "🎉 You Win!";
+            status.className = "status won";
+          } else {
+            status.textContent = "😢 You Lose!";
+            status.className = "status lost";
+          }
+        } else {
+          document.getElementById("game-over-buttons").style.display = "none";
+          if (gameState.yourTurn) {
+            status.textContent = "🎯 Your Turn";
+            status.className = "status your-turn";
+          } else {
+            status.textContent = "⏳ Opponent's Turn";
+            status.className = "status opponent-turn";
+          }
+        }
+      }
+
+      function renderBoard() {
+        const board = document.getElementById("board");
+        board.innerHTML = "";
+        for (let i = 0; i < 9; i++) {
+          const cell = document.createElement("button");
+          cell.className = "cell";
+          if (gameState.board[i]) {
+            cell.textContent = gameState.board[i];
+            cell.classList.add(gameState.board[i].toLowerCase());
+            cell.disabled = true;
+          } else {
+            cell.disabled =
+              !gameState.yourTurn || gameState.status !== "playing";
+          }
+          cell.onclick = () => makeMove(i);
+          board.appendChild(cell);
+        }
+      }
+
+      function displayLeaderboard(leaderboard) {
+        const list = document.getElementById("leaderboard-list");
+        list.innerHTML = "";
+
+        if (leaderboard.length === 0) {
+          list.innerHTML =
+            '<p style="text-align: center; padding: 20px;">No players yet</p>';
+          return;
+        }
+
+        leaderboard.forEach((player, index) => {
+          const item = document.createElement("div");
+          item.className = "leaderboard-item";
+          item.innerHTML = `
+                    <div class="rank">#${index + 1}</div>
+                    <div class="player-stats">
+                        <div class="player-name">${player.username}</div>
+                        <div class="stats">${player.wins}W - ${
+            player.losses
+          }L - ${player.draws}D</div>
+                    </div>
+                    <div class="score">${player.wins * 3 + player.draws}</div>
+                `;
+          list.appendChild(item);
+        });
+      }
+
+      // Initialize
+      log("🎮 Tic-Tac-Toe Test Client Ready");
+      log("💡 Server: " + SERVER_URL);
+    </script>
+  </body>
+</html>
