@@ -359,11 +359,12 @@
         document.querySelector(`.${screen}-screen`).classList.add("active");
       }
 
-      function connectWebSocket() {
+      function connectWebSocket(onConnected) {
         ws = new WebSocket(SERVER_URL);
 
         ws.onopen = () => {
           log("✅ Connected to server");
+          if (onConnected) onConnected(); // Call callback when connected
         };
 
         ws.onmessage = (event) => {
@@ -375,7 +376,7 @@
         ws.onerror = (error) => {
           log("❌ WebSocket error");
           alert(
-            "Failed to connect to server. Make sure the server is running on localhost:3000"
+            "Connection failed. Server might be waking up (Render free tier), please wait 30 seconds and try again."
           );
         };
 
@@ -456,10 +457,11 @@
           return;
         }
         username = name;
-        connectWebSocket();
-        setTimeout(() => {
+        log("🔌 Connecting to server...");
+        connectWebSocket(() => {
+          // Send JOIN only after connection is confirmed open
           sendMessage("JOIN", { username });
-        }, 500);
+        });
       }
 
       function findMatch() {
