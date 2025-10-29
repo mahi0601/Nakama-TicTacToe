@@ -14,7 +14,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 
 // Configure server URL - change this to your deployed server URL
-const SERVER_URL = 'ws://10.68.35.111:3000'; // Your computer's IP address
+const SERVER_URL = 'wss://nakama-tictactoe.onrender.com'; // Your computer's IP address
 
 type Screen = 'login' | 'menu' | 'game' | 'leaderboard';
 
